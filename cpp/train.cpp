@@ -1,0 +1,122 @@
+/*
+ * train.cpp
+ *
+ * Treina uma CNN pequena (LeNet-like) em MNIST. Versao SEQUENCIAL
+ *
+ * Uso:
+ *   ./train --ref-size N --batch B --iters K --lr LR
+ */
+
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <string>
+#include <vector>
+#include <thread>
+#include <fstream>
+#include <sstream>
+#include <set>
+#include <chrono>
+
+#include "network.hpp"
+#include "mnist.hpp"
+
+static const char *arg_value(int argc, char **argv, const char *flag, const char *def) {
+    for (int i = 0; i < argc - 1; i++)
+        if (std::strcmp(argv[i], flag) == 0) return argv[i + 1];
+    return def;
+}
+
+/* Conta nucleos fisicos via /proc/cpuinfo (pares unicos physical id + core id).
+ * Se nao conseguir ler, cai para hardware_concurrency() (numero logico). */
+static int physical_core_count() {
+    std::ifstream f("/proc/cpuinfo");
+    if (!f) return (int)std::thread::hardware_concurrency();
+
+    std::string line;
+    long cur_phys = -1, cur_core = -1;
+    std::set<std::pair<long, long>> seen;
+    while (std::getline(f, line)) {
+        if (line.rfind("physical id", 0) == 0) {
+            auto pos = line.find(':');
+            if (pos != std::string::npos) cur_phys = std::stol(line.substr(pos + 1));
+        } else if (line.rfind("core id", 0) == 0) {
+            auto pos = line.find(':');
+            if (pos != std::string::npos) {
+                cur_core = std::stol(line.substr(pos + 1));
+                seen.insert({cur_phys, cur_core});
+            }
+        }
+    }
+    if (seen.empty()) return (int)std::thread::hardware_concurrency();
+    return (int)seen.size();
+}
+
+int main(int argc, char **argv) {
+    std::string data_dir = arg_value(argc, argv, "--data-dir", "data");
+    int ref_size = std::atoi(arg_value(argc, argv, "--ref-size", "2000"));
+    int batch = std::atoi(arg_value(argc, argv, "--batch", "32"));
+    int iters = std::atoi(arg_value(argc, argv, "--iters", "50"));
+    float lr = std::atof(arg_value(argc, argv, "--lr", "0.05"));
+    unsigned seed = (unsigned)std::atoi(arg_value(argc, argv, "--seed", "42"));
+
+    printf("nucleos_fisicos=%d processadores_logicos=%d (execucao sequencial)\n",
+           physical_core_count(), (int)std::thread::hardware_concurrency());
+
+    MnistData train = load_mnist(data_dir + "/train.bin", ref_size);
+    if ((int)train.images.size() < ref_size) {
+        fprintf(stderr, "aviso: ref-size pedido=%d, disponivel=%zu\n", ref_size, train.images.size());
+        ref_size = (int)train.images.size();
+    }
+
+    LeNetParams params = lenet_init(seed);
+    LeNetGrad grad;
+    grad.zero(params);
+
+    double total_loss = 0.0;
+    long total_correct = 0;
+    long total_samples = 0;
+
+    auto t0 = std::chrono::steady_clock::now();
+
+    for (int it = 0; it < iters; it++) {
+        /* zera reaproveitando os buffers ja alocados (evita realocar a cada iter) */
+        std::fill(grad.conv1.dW.begin(), grad.conv1.dW.end(), 0.0f);
+        std::fill(grad.conv1.db.begin(), grad.conv1.db.end(), 0.0f);
+        std::fill(grad.conv2.dW.begin(), grad.conv2.dW.end(), 0.0f);
+        std::fill(grad.conv2.db.begin(), grad.conv2.db.end(), 0.0f);
+        std::fill(grad.fc1.dW.begin(), grad.fc1.dW.end(), 0.0f);
+        std::fill(grad.fc1.db.begin(), grad.fc1.db.end(), 0.0f);
+        std::fill(grad.fc2.dW.begin(), grad.fc2.dW.end(), 0.0f);
+        std::fill(grad.fc2.db.begin(), grad.fc2.db.end(), 0.0f);
+        std::fill(grad.fc3.dW.begin(), grad.fc3.dW.end(), 0.0f);
+        std::fill(grad.fc3.db.begin(), grad.fc3.db.end(), 0.0f);
+
+        double iter_loss = 0.0;
+        long iter_correct = 0;
+
+        for (int s = 0; s < batch; s++) {
+            int gi = (it * batch + s) % ref_size;
+            int predicted;
+            float loss = lenet_forward_backward(params, train.images[gi], train.labels[gi], grad, predicted);
+            iter_loss += loss;
+            if (predicted == train.labels[gi]) iter_correct++;
+        }
+
+        lenet_sgd_update(params, grad, lr / (float)batch);
+
+        total_loss += iter_loss;
+        total_correct += iter_correct;
+        total_samples += batch;
+    }
+
+    auto t1 = std::chrono::steady_clock::now();
+    double elapsed = std::chrono::duration<double>(t1 - t0).count();
+
+    printf("ref_size=%d batch=%d iters=%d total_amostras=%ld\n", ref_size, batch, iters, total_samples);
+    printf("tempo=%.6f loss_medio=%.4f acuracia_treino=%.4f\n",
+           elapsed, total_loss / total_samples, (double)total_correct / total_samples);
+    printf("tempo_total=%.6f\n", elapsed);
+
+    return 0;
+}
