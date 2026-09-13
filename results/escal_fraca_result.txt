@@ -1,0 +1,114 @@
+(base) heloysapelizon@Heloysas-MacBook-Pro-4 cnn_paralell % base_batch=32                                                                                                             (base) heloysapelizon@Heloysas-MacBook-Pro-4 cnn_paralell % base_batch=32
+for p in 1 2 4 6 8 10; do
+  export OMP_NUM_THREADS=$p
+  b=$((base_batch * p))
+  for i in 1 2 3; do ./train --ref-size 5000 --batch $b --iters 3500; done 
+done
+
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=1
+tempo=34.247446 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=34.223414 (99.93%)  [eixo paralelizavel]
+tempo_total=34.247446
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=1
+tempo=34.214276 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=34.190331 (99.93%)  [eixo paralelizavel]
+tempo_total=34.214276
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=1
+tempo=34.213183 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=34.189055 (99.93%)  [eixo paralelizavel]
+tempo_total=34.213183
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=2
+tempo=35.240400 loss_medio=0.0588 acuracia_treino=0.9829
+tempo_batch_loop=35.210402 (99.91%)  [eixo paralelizavel]
+tempo_total=35.240400
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=2
+tempo=34.917560 loss_medio=0.0588 acuracia_treino=0.9829
+tempo_batch_loop=34.886418 (99.91%)  [eixo paralelizavel]
+tempo_total=34.917560
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=2
+tempo=34.979053 loss_medio=0.0588 acuracia_treino=0.9829
+tempo_batch_loop=34.947937 (99.91%)  [eixo paralelizavel]
+tempo_total=34.979053
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=4
+tempo=37.528450 loss_medio=0.0495 acuracia_treino=0.9859
+tempo_batch_loop=37.404251 (99.67%)  [eixo paralelizavel]
+tempo_total=37.528450
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=4
+tempo=41.618972 loss_medio=0.0495 acuracia_treino=0.9859
+tempo_batch_loop=41.544407 (99.82%)  [eixo paralelizavel]
+tempo_total=41.618972
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=4
+tempo=37.585823 loss_medio=0.0495 acuracia_treino=0.9859
+tempo_batch_loop=37.470537 (99.69%)  [eixo paralelizavel]
+tempo_total=37.585823
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=6
+tempo=38.730335 loss_medio=0.0577 acuracia_treino=0.9844
+tempo_batch_loop=38.617555 (99.71%)  [eixo paralelizavel]
+tempo_total=38.730335
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=6
+tempo=38.902035 loss_medio=0.0577 acuracia_treino=0.9844
+tempo_batch_loop=38.831426 (99.82%)  [eixo paralelizavel]
+tempo_total=38.902035
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=6
+tempo=38.270869 loss_medio=0.0577 acuracia_treino=0.9844
+tempo_batch_loop=38.160599 (99.71%)  [eixo paralelizavel]
+tempo_total=38.270869
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=8
+tempo=56.690472 loss_medio=0.0444 acuracia_treino=0.9877
+tempo_batch_loop=56.588617 (99.82%)  [eixo paralelizavel]
+tempo_total=56.690472
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=8
+tempo=56.551352 loss_medio=0.0444 acuracia_treino=0.9877
+tempo_batch_loop=56.450609 (99.82%)  [eixo paralelizavel]
+tempo_total=56.551352
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=8
+tempo=58.953656 loss_medio=0.0444 acuracia_treino=0.9877
+tempo_batch_loop=58.869022 (99.86%)  [eixo paralelizavel]
+tempo_total=58.953656
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=10
+tempo=58.936468 loss_medio=0.0442 acuracia_treino=0.9879
+tempo_batch_loop=58.797753 (99.76%)  [eixo paralelizavel]
+tempo_total=58.936468
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=10
+tempo=59.185631 loss_medio=0.0442 acuracia_treino=0.9879
+tempo_batch_loop=59.051728 (99.77%)  [eixo paralelizavel]
+tempo_total=59.185631
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=10
+tempo=58.621347 loss_medio=0.0442 acuracia_treino=0.9879
+tempo_batch_loop=58.487935 (99.77%)  [eixo paralelizavel]
+tempo_total=58.621347

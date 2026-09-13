@@ -1,0 +1,30 @@
+(base) heloysapelizon@Heloysas-MacBook-Pro-4 cnn_paralell % system_profiler SPHardwareDataType
+2026-09-13 14:30:49.486 system_profiler[35699:589290] hw.cpufamily: 0xda33d83d
+Hardware:
+
+    Hardware Overview:
+
+      Model Name: MacBook Pro
+      Model Identifier: Mac14,9
+      Model Number: MPHE3LL/A
+      Chip: Apple M2 Pro
+      Total Number of Cores: 10 (6 Performance and 4 Efficiency)
+      Memory: 16 GB
+      System Firmware Version: 18000.161.10
+      OS Loader Version: 18000.161.10
+      Serial Number (system): CY1JQGH7M4
+      Hardware UUID: A1C2FD45-3722-5601-8634-719DD0A7D49F
+      Provisioning UDID: 00006020-000A019034C3C01E
+      Activation Lock Status: Enabled
+
+(base) heloysapelizon@Heloysas-MacBook-Pro-4 cnn_paralell % sysctl -n hw.physicalcpu hw.logicalcpu 
+10
+10
+(base) heloysapelizon@Heloysas-MacBook-Pro-4 cnn_paralell % sysctl -n hw.perflevel0.physicalcpu
+6
+(base) heloysapelizon@Heloysas-MacBook-Pro-4 cnn_paralell % sysctl -n hw.perflevel1.physicalcpu
+4
+(base) heloysapelizon@Heloysas-MacBook-Pro-4 cnn_paralell % sysctl -n hw.l2cachesize  
+4194304
+(base) heloysapelizon@Heloysas-MacBook-Pro-4 cnn_paralell % sysctl -n hw.memsize 
+17179869184

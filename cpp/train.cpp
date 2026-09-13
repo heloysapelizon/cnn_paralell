@@ -88,6 +88,7 @@ int main(int argc, char **argv) {
 
     /* Um LeNetGrad por thread, reduzido apos o parallel for (ver README). */
     std::vector<LeNetGrad> thread_grads;
+    int n_threads_used = 1; /* capturado via omp_get_num_threads() dentro do parallel abaixo */
 
     double total_loss = 0.0;
     long total_correct = 0;
@@ -95,7 +96,9 @@ int main(int argc, char **argv) {
 
     /* Tempo por eixo (ver README, secao "Saida do ./train"). */
     double t_zero_grad = 0.0;
-    double t_batch_loop = 0.0;
+    double t_parallel_region = 0.0; /* so o que esta dentro de #pragma omp parallel */
+    double t_reduction = 0.0;       /* soma serial de thread_grads em grad, fora do parallel */
+    double t_batch_loop = 0.0;      /* t_parallel_region + t_reduction */
     double t_sgd_update = 0.0;
 
     double t0 = wtime();
@@ -134,11 +137,12 @@ int main(int argc, char **argv) {
                 #else
                 int nt = 1;
                 #endif
+                n_threads_used = nt;
                 thread_grads.resize(nt);
                 for (auto &tg : thread_grads) tg.zero(params);
             }
 
-            #pragma omp for reduction(+:iter_loss,iter_correct)
+            #pragma omp for reduction(+:iter_loss,iter_correct) schedule(dynamic)
             for (int s = 0; s < batch; s++) {
                 int gi = (it * batch + s) % ref_size;
                 int predicted;
@@ -148,7 +152,12 @@ int main(int argc, char **argv) {
                 if (predicted == train.labels[gi]) iter_correct++;
             }
         }
+        t_parallel_region += wtime() - tb0;
+
+        double tr0 = wtime();
         for (auto &tg : thread_grads) grad.add(tg);
+        t_reduction += wtime() - tr0;
+
         t_batch_loop += wtime() - tb0;
 
         double tu0 = wtime();
@@ -162,13 +171,18 @@ int main(int argc, char **argv) {
 
     double elapsed = wtime() - t0;
 
-    printf("ref_size=%d batch=%d iters=%d total_amostras=%ld\n", ref_size, batch, iters, total_samples);
+    printf("threads_usadas=%d\n", n_threads_used);
+    /* printf("ref_size=%d batch=%d iters=%d total_amostras=%ld\n", ref_size, batch, iters, total_samples); */
     printf("tempo=%.6f loss_medio=%.4f acuracia_treino=%.4f\n",
            elapsed, total_loss / total_samples, (double)total_correct / total_samples);
-    printf("tempo_zero_grad=%.6f (%.2f%%)\n", t_zero_grad, 100.0 * t_zero_grad / elapsed);
+    /* printf("tempo_zero_grad=%.6f (%.2f%%)\n", t_zero_grad, 100.0 * t_zero_grad / elapsed); */
     printf("tempo_batch_loop=%.6f (%.2f%%)  [eixo paralelizavel]\n", t_batch_loop, 100.0 * t_batch_loop / elapsed);
-    printf("tempo_sgd_update=%.6f (%.2f%%)\n", t_sgd_update, 100.0 * t_sgd_update / elapsed);
-    printf("tempo_total=%.6f\n", elapsed);
+    printf("tempo_parallel_region=%.6f (%.2f%%)  [de fato concorrente]\n",
+           t_parallel_region, 100.0 * t_parallel_region / elapsed);
+    printf("tempo_reduction=%.6f (%.2f%%)  [sequencial, soma thread_grads]\n",
+           t_reduction, 100.0 * t_reduction / elapsed);
+    /* printf("tempo_sgd_update=%.6f (%.2f%%)\n", t_sgd_update, 100.0 * t_sgd_update / elapsed); */
+    printf("tempo_total=%.6f\n \n", elapsed);
 
     return 0;
 }

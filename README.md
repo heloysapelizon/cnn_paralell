@@ -5,8 +5,8 @@
 **Paralelizada com OpenMP.** O laço de amostras do batch
 (`cpp/train.cpp`, dentro do `for (int it...)`) roda em paralelo; o
 mesmo binário compila como baseline sequencial de referência
-compilando sem `-fopenmp` (ver "Build sequencial de referência"
-abaixo). O profiling (`profile_seq.txt`, gerado com `sample`) e a
+compilando sem `-fopenmp` (ver "Compilar sem paralelismo" abaixo).
+O profiling (`profile_seq.txt`, gerado com `sample`) e a
 instrumentação por eixo (`tempo_batch_loop` na saída do `./train`)
 confirmaram esse laço como o único eixo relevante antes de paralelizar
 — ver "Eixo de paralelismo" abaixo.
@@ -71,31 +71,29 @@ batch; `iter_loss`/`iter_correct` usam `reduction(+:...)`. Depois do
 `network.hpp`) é feita **serialmente**, antes do `lenet_sgd_update` —
 esse é o ponto de sincronização do item 2 acima.
 
-## Build sequencial de referência
+**`tempo_batch_loop` inclui essa redução serial** (ela está fora do
+`#pragma omp parallel`, mas dentro do intervalo medido). Isso significa
+que os ~99% de "eixo paralelizável" reportados por essa métrica
+superestimam levemente a fração de fato concorrente — uma parte
+pequena, mas real e sequencial, está embutida ali. `tempo_parallel_region`
+isola só o que está dentro do `#pragma omp parallel`, e `tempo_reduction`
+isola só a soma serial (ver "Saída do ./train" abaixo). Medido
+(`--ref-size 5000 --batch 320 --iters 100`), `tempo_reduction` cresce de
+forma quase linear com o número de threads (0.01% do tempo total em
+p=1 até 0.57% em p=10) — esperado, já que mais threads produzem mais
+`LeNetGrad` locais para somar, e cada soma percorre todos os pesos da
+rede. Em valores absolutos ainda é pequeno (cada `lenet_forward_backward`
+domina o custo), mas é a manifestação concreta de Amdahl *dentro* do
+próprio trecho paralelizado.
 
-O binário sequencial de referência é o **mesmo `train.cpp`**,
-compilado sem `-fopenmp` — não um arquivo separado:
+## Detalhes do build sem `-fopenmp`
 
-```bash
-make clean && make all OMPFLAG=
-```
-
-Sem `-fopenmp`, os `#pragma omp` são ignorados pelo compilador (warning,
-não erro) e o código roda sequencial: `tid=0`, `nt=1`, um único
+Sem a flag, o código roda sequencial: `tid=0`, `nt=1`, um único
 `LeNetGrad` em `thread_grads[0]`, equivalente ao laço sequencial
 original. `wtime()` também cai para `std::chrono::steady_clock` nesse
 caso, porque `omp_get_wtime()` só linka com `-fopenmp` (mesma semântica
-de wall-clock, só muda a fonte do relógio).
-
-O número de threads da versão paralela é controlado pela variável de
-ambiente padrão do OpenMP:
-
-```bash
-OMP_NUM_THREADS=4 ./train --ref-size 2000 --batch 32 --iters 60
-```
-
-Sem `OMP_NUM_THREADS`, o runtime decide sozinho (tipicamente = núcleos
-lógicos).
+de wall-clock, só muda a fonte do relógio). Ver "Compilar sem
+paralelismo" acima para o comando.
 
 ## Estrutura dos arquivos
 
@@ -129,10 +127,39 @@ cnn_paralell/
 
 ```bash
 python3 python/prepare_mnist.py   # baixa o MNIST e gera data/train.bin, data/test.bin
-make all                           # compila ./train a partir de cpp/
+make all                           # compila ./train a partir de cpp/ (com OpenMP)
 make test                          # roda a checagem de gradiente em Python (40/40 devem passar)
-./train --ref-size 2000 --batch 32 --iters 60
+./train --ref-size 5000 --batch 64 --iters 3500
 ```
+
+### Compilar com paralelismo (padrão)
+
+`make all` já compila com `-fopenmp` por padrão (variável `OMPFLAG` no
+`Makefile`). O número de threads é controlado em tempo de execução pela
+variável de ambiente `OMP_NUM_THREADS`:
+
+```bash
+make clean && make all
+OMP_NUM_THREADS=4 ./train --ref-size 5000 --batch 64 --iters 3500
+```
+
+Sem `OMP_NUM_THREADS`, o runtime OpenMP decide sozinho (tipicamente =
+núcleos lógicos da máquina).
+
+### Compilar sem paralelismo (baseline sequencial)
+
+Mesmo `train.cpp`, compilado sem `-fopenmp` — não é um arquivo
+separado. Basta zerar `OMPFLAG`:
+
+```bash
+make clean && make all OMPFLAG=
+./train --ref-size 5000 --batch 64 --iters 3500
+```
+
+Sem `-fopenmp`, os `#pragma omp` são ignorados pelo compilador
+(warning, não erro) e o laço roda sequencial. `OMP_NUM_THREADS` não
+tem efeito nesse binário. Use esse build para tirar o T1 (tempo
+sequencial de referência) e comparar com as execuções paralelas.
 
 ### Build no macOS
 
@@ -159,12 +186,25 @@ Em Linux o `Makefile` usa `g++` do sistema direto, sem `-isysroot`.
 
 ## Saída do `./train`
 
-Além do tempo total (`tempo_total=`), o binário imprime o tempo gasto
-em cada eixo do loop de treino (medido com `wtime()`, ver "Build
-sequencial de referência"):
+- `threads_usadas=` — número real de threads OpenMP usadas no laço
+  paralelo (lido via `omp_get_num_threads()` dentro da região
+  paralela, capturado uma vez no primeiro `it`). É o valor a registrar
+  na tabela de escalabilidade forte da Fase 7 — sempre `1` no binário
+  sequencial de referência (`OMPFLAG=`).
 
-- `tempo_batch_loop` — o laço paralelo de amostras (ver "Eixo de
-  paralelismo").
+Além do tempo total (`tempo_total=`), o binário imprime o tempo gasto
+em cada eixo do loop de treino (medido com `wtime()`, ver "Detalhes do
+build sem `-fopenmp`"):
+
+- `tempo_batch_loop` — o laço de amostras completo, incluindo a
+  redução serial dos gradientes por thread (ver "Eixo de
+  paralelismo"). Soma de `tempo_parallel_region` + `tempo_reduction`.
+- `tempo_parallel_region` — só o que está dentro do `#pragma omp
+  parallel` (de fato concorrente). Mais preciso que `tempo_batch_loop`
+  para estimar a fração paralelizável real.
+- `tempo_reduction` — a soma serial de `thread_grads` em `grad`
+  (`LeNetGrad::add`), fora da região paralela. Pequeno em valor
+  absoluto, mas cresce com o número de threads.
 - `tempo_zero_grad` — zerar os buffers de gradiente a cada iteração
   (sequencial).
 - `tempo_sgd_update` — o update de pesos, `lenet_sgd_update`
