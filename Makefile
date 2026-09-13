@@ -1,5 +1,24 @@
+UNAME_S := $(shell uname -s)
+
+# OMPFLAG isolado do resto de CXXFLAGS para poder ligar/desligar so o OpenMP
+# pela linha de comando (o binario sequencial de referencia e o MESMO
+# codigo-fonte, so compilado sem esta flag -- nao um train.cpp separado):
+#   make all                  -> paralelo (com -fopenmp)
+#   make all OMPFLAG=         -> sequencial de referencia (sem -fopenmp)
+OMPFLAG = -fopenmp
+
+ifeq ($(UNAME_S),Darwin)
+# macOS: g++/gcc do sistema e Apple Clang (sem suporte a -fopenmp) -> usa o
+# GCC de verdade do Homebrew (brew install gcc) e aponta o sysroot para o
+# SDK do Xcode/Command Line Tools, senao o GCC do Homebrew nao acha os
+# headers padrao (math.h, stdio.h etc).
+CXX = g++-16
+CXXFLAGS = -O3 -std=c++17 -Wall -Wextra $(OMPFLAG) -isysroot $(shell xcrun --show-sdk-path)
+else
+# Linux: g++ do sistema ja suporta -fopenmp direto.
 CXX = g++
-CXXFLAGS = -O3 -std=c++17 -Wall -Wextra
+CXXFLAGS = -O3 -std=c++17 -Wall -Wextra $(OMPFLAG)
+endif
 
 CPP_DIR = cpp
 PY_DIR = python

@@ -1,10 +1,9 @@
 /*
  * train.cpp
  *
- * Treina uma CNN pequena (LeNet-like) em MNIST. Versao SEQUENCIAL
- *
- * Uso:
- *   ./train --ref-size N --batch B --iters K --lr LR
+ * Treina uma CNN pequena (LeNet-like) em MNIST. Paralelizado com OpenMP
+ * (ver README.md). Uso:
+ *   OMP_NUM_THREADS=4 ./train --ref-size N --batch B --iters K --lr LR
  */
 
 #include <cstdio>
@@ -17,6 +16,9 @@
 #include <sstream>
 #include <set>
 #include <chrono>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 #include "network.hpp"
 #include "mnist.hpp"
@@ -25,6 +27,17 @@ static const char *arg_value(int argc, char **argv, const char *flag, const char
     for (int i = 0; i < argc - 1; i++)
         if (std::strcmp(argv[i], flag) == 0) return argv[i + 1];
     return def;
+}
+
+/* omp_get_wtime() so linka com -fopenmp; sem a flag cai para
+ * std::chrono (ver README, secao "Build sequencial de referencia"). */
+static double wtime() {
+#ifdef _OPENMP
+    return omp_get_wtime();
+#else
+    using namespace std::chrono;
+    return duration<double>(steady_clock::now().time_since_epoch()).count();
+#endif
 }
 
 /* Conta nucleos fisicos via /proc/cpuinfo (pares unicos physical id + core id).
@@ -60,7 +73,7 @@ int main(int argc, char **argv) {
     float lr = std::atof(arg_value(argc, argv, "--lr", "0.05"));
     unsigned seed = (unsigned)std::atoi(arg_value(argc, argv, "--seed", "42"));
 
-    printf("nucleos_fisicos=%d processadores_logicos=%d (execucao sequencial)\n",
+    printf("nucleos_fisicos=%d processadores_logicos=%d\n",
            physical_core_count(), (int)std::thread::hardware_concurrency());
 
     MnistData train = load_mnist(data_dir + "/train.bin", ref_size);
@@ -73,13 +86,22 @@ int main(int argc, char **argv) {
     LeNetGrad grad;
     grad.zero(params);
 
+    /* Um LeNetGrad por thread, reduzido apos o parallel for (ver README). */
+    std::vector<LeNetGrad> thread_grads;
+
     double total_loss = 0.0;
     long total_correct = 0;
     long total_samples = 0;
 
-    auto t0 = std::chrono::steady_clock::now();
+    /* Tempo por eixo (ver README, secao "Saida do ./train"). */
+    double t_zero_grad = 0.0;
+    double t_batch_loop = 0.0;
+    double t_sgd_update = 0.0;
+
+    double t0 = wtime();
 
     for (int it = 0; it < iters; it++) {
+        double tz0 = wtime();
         /* zera reaproveitando os buffers ja alocados (evita realocar a cada iter) */
         std::fill(grad.conv1.dW.begin(), grad.conv1.dW.end(), 0.0f);
         std::fill(grad.conv1.db.begin(), grad.conv1.db.end(), 0.0f);
@@ -91,31 +113,61 @@ int main(int argc, char **argv) {
         std::fill(grad.fc2.db.begin(), grad.fc2.db.end(), 0.0f);
         std::fill(grad.fc3.dW.begin(), grad.fc3.dW.end(), 0.0f);
         std::fill(grad.fc3.db.begin(), grad.fc3.db.end(), 0.0f);
+        t_zero_grad += wtime() - tz0;
 
         double iter_loss = 0.0;
         long iter_correct = 0;
 
-        for (int s = 0; s < batch; s++) {
-            int gi = (it * batch + s) % ref_size;
-            int predicted;
-            float loss = lenet_forward_backward(params, train.images[gi], train.labels[gi], grad, predicted);
-            iter_loss += loss;
-            if (predicted == train.labels[gi]) iter_correct++;
-        }
+        double tb0 = wtime();
+        #pragma omp parallel
+        {
+            #ifdef _OPENMP
+            int tid = omp_get_thread_num();
+            #else
+            int tid = 0;
+            #endif
 
+            #pragma omp single
+            {
+                #ifdef _OPENMP
+                int nt = omp_get_num_threads();
+                #else
+                int nt = 1;
+                #endif
+                thread_grads.resize(nt);
+                for (auto &tg : thread_grads) tg.zero(params);
+            }
+
+            #pragma omp for reduction(+:iter_loss,iter_correct)
+            for (int s = 0; s < batch; s++) {
+                int gi = (it * batch + s) % ref_size;
+                int predicted;
+                float loss = lenet_forward_backward(params, train.images[gi], train.labels[gi],
+                                                      thread_grads[tid], predicted);
+                iter_loss += loss;
+                if (predicted == train.labels[gi]) iter_correct++;
+            }
+        }
+        for (auto &tg : thread_grads) grad.add(tg);
+        t_batch_loop += wtime() - tb0;
+
+        double tu0 = wtime();
         lenet_sgd_update(params, grad, lr / (float)batch);
+        t_sgd_update += wtime() - tu0;
 
         total_loss += iter_loss;
         total_correct += iter_correct;
         total_samples += batch;
     }
 
-    auto t1 = std::chrono::steady_clock::now();
-    double elapsed = std::chrono::duration<double>(t1 - t0).count();
+    double elapsed = wtime() - t0;
 
     printf("ref_size=%d batch=%d iters=%d total_amostras=%ld\n", ref_size, batch, iters, total_samples);
     printf("tempo=%.6f loss_medio=%.4f acuracia_treino=%.4f\n",
            elapsed, total_loss / total_samples, (double)total_correct / total_samples);
+    printf("tempo_zero_grad=%.6f (%.2f%%)\n", t_zero_grad, 100.0 * t_zero_grad / elapsed);
+    printf("tempo_batch_loop=%.6f (%.2f%%)  [eixo paralelizavel]\n", t_batch_loop, 100.0 * t_batch_loop / elapsed);
+    printf("tempo_sgd_update=%.6f (%.2f%%)\n", t_sgd_update, 100.0 * t_sgd_update / elapsed);
     printf("tempo_total=%.6f\n", elapsed);
 
     return 0;
