@@ -1,4 +1,6 @@
 /.env
 /data
 train
+model.bin
 /.vscode
+.ipynb_checkpoints/

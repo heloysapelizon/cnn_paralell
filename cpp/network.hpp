@@ -1,6 +1,7 @@
 #ifndef NETWORK_HPP
 #define NETWORK_HPP
 
+#include <string>
 #include "layers.hpp"
 
 struct LeNetParams {
@@ -53,5 +54,12 @@ int lenet_predict(const LeNetParams &p, const Vecf &image);
 /* Atualiza os pesos via SGD: p := p - lr * grad (grad ja deve vir
  * normalizado, tipicamente dividido pelo tamanho do batch). */
 void lenet_sgd_update(LeNetParams &p, const LeNetGrad &grad, float lr);
+
+/* Salva/carrega os pesos treinados (binario raw, sem cabecalho de
+ * shape -- a arquitetura e fixa, entao a ordem dos campos basta).
+ * lenet_load_params lanca std::runtime_error se o arquivo nao existir
+ * ou estiver truncado. */
+void lenet_save_params(const LeNetParams &p, const std::string &path);
+LeNetParams lenet_load_params(const std::string &path);
 
 #endif /* NETWORK_HPP */

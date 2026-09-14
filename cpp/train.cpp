@@ -46,6 +46,7 @@ static double wtime() {
 
 int main(int argc, char **argv) {
     std::string data_dir = arg_value(argc, argv, "--data-dir", "data");
+    std::string model_out = arg_value(argc, argv, "--model-out", "model.bin");
     int ref_size = std::atoi(arg_value(argc, argv, "--ref-size", "2000"));
     int batch = std::atoi(arg_value(argc, argv, "--batch", "32"));
     int iters = std::atoi(arg_value(argc, argv, "--iters", "50"));
@@ -161,6 +162,9 @@ int main(int argc, char **argv) {
            t_reduction, 100.0 * t_reduction / elapsed);
     /* printf("tempo_sgd_update=%.6f (%.2f%%)\n", t_sgd_update, 100.0 * t_sgd_update / elapsed); */
     printf("tempo_total=%.6f\n \n", elapsed);
+
+    lenet_save_params(params, model_out);
+    printf("modelo_salvo=%s\n", model_out.c_str());
 
     return 0;
 }

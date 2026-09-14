@@ -1,4 +1,7 @@
 #include "network.hpp"
+#include <fstream>
+#include <stdexcept>
+#include <cstdint>
 
 LeNetParams lenet_init(unsigned seed) {
     LeNetParams p;
@@ -137,4 +140,44 @@ void lenet_sgd_update(LeNetParams &p, const LeNetGrad &grad, float lr) {
     sgd_vec(p.fc2.b, grad.fc2.db, lr);
     sgd_vec(p.fc3.W, grad.fc3.dW, lr);
     sgd_vec(p.fc3.b, grad.fc3.db, lr);
+}
+
+static void write_vec(std::ofstream &f, const Vecf &v) {
+    uint64_t n = v.size();
+    f.write(reinterpret_cast<const char *>(&n), sizeof(n));
+    f.write(reinterpret_cast<const char *>(v.data()), n * sizeof(float));
+}
+
+static void read_vec(std::ifstream &f, Vecf &v, const std::string &path) {
+    uint64_t n = 0;
+    f.read(reinterpret_cast<char *>(&n), sizeof(n));
+    if (!f) throw std::runtime_error("erro lendo tamanho de vetor em " + path);
+    if (n != v.size())
+        throw std::runtime_error("shape incompativel em " + path +
+                                  " (esperado " + std::to_string(v.size()) +
+                                  ", lido " + std::to_string(n) + ") -- pesos de outra arquitetura?");
+    f.read(reinterpret_cast<char *>(v.data()), n * sizeof(float));
+    if (!f) throw std::runtime_error("EOF inesperado lendo pesos de " + path);
+}
+
+void lenet_save_params(const LeNetParams &p, const std::string &path) {
+    std::ofstream f(path, std::ios::binary);
+    if (!f) throw std::runtime_error("nao foi possivel abrir para escrita: " + path);
+    write_vec(f, p.conv1.W); write_vec(f, p.conv1.b);
+    write_vec(f, p.conv2.W); write_vec(f, p.conv2.b);
+    write_vec(f, p.fc1.W);   write_vec(f, p.fc1.b);
+    write_vec(f, p.fc2.W);   write_vec(f, p.fc2.b);
+    write_vec(f, p.fc3.W);   write_vec(f, p.fc3.b);
+}
+
+LeNetParams lenet_load_params(const std::string &path) {
+    LeNetParams p = lenet_init(0); /* shapes fixos da arquitetura; pesos serao sobrescritos */
+    std::ifstream f(path, std::ios::binary);
+    if (!f) throw std::runtime_error("nao foi possivel abrir " + path);
+    read_vec(f, p.conv1.W, path); read_vec(f, p.conv1.b, path);
+    read_vec(f, p.conv2.W, path); read_vec(f, p.conv2.b, path);
+    read_vec(f, p.fc1.W, path);   read_vec(f, p.fc1.b, path);
+    read_vec(f, p.fc2.W, path);   read_vec(f, p.fc2.b, path);
+    read_vec(f, p.fc3.W, path);   read_vec(f, p.fc3.b, path);
+    return p;
 }

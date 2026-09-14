@@ -112,14 +112,18 @@ cnn_paralell/
 │   │                        (um único fread, sem parsing de formato externo).
 │   └── train.cpp          — treino paralelo (OpenMP) + medição de tempo
 │                             por eixo (ver "Eixo de paralelismo" e
-│                             "Saída do ./train" acima/abaixo).
+│                             "Saída do ./train" acima/abaixo); salva os
+│                             pesos treinados em --model-out ao final.
 ├── python/
 │   ├── prepare_mnist.py   — baixa o MNIST (formato IDX original), descompacta
 │   │                        e converte para o binário raw que mnist.cpp lê
 │   │                        (data/train.bin, data/test.bin).
-│   └── gradient_check.py  — reimplementação em NumPy da mesma arquitetura,
-│                             valida a matemática do backward por diferenças
-│                             finitas (40 checagens, todas OK — ver `make test`).
+│   ├── gradient_check.py  — reimplementação em NumPy da mesma arquitetura,
+│   │                        valida a matemática do backward por diferenças
+│   │                        finitas (40 checagens, todas OK — ver `make test`).
+│   └── classify.ipynb     — notebook: carrega os pesos salvos por train.cpp
+│                             e mostra dígitos do conjunto de teste ao lado
+│                             da previsão (ver "Classificação" abaixo).
 └── data/                  — arquivos baixados/gerados (não versionado)
 ```
 
@@ -130,7 +134,49 @@ python3 python/prepare_mnist.py   # baixa o MNIST e gera data/train.bin, data/te
 make all                           # compila ./train a partir de cpp/ (com OpenMP)
 make test                          # roda a checagem de gradiente em Python (40/40 devem passar)
 ./train --ref-size 5000 --batch 64 --iters 3500
+jupyter notebook python/classify.ipynb
 ```
+
+## Classificação
+
+`train.cpp` salva os pesos treinados em `--model-out` (padrão
+`model.bin`) ao final da execução, via `lenet_save_params`
+(`network.cpp`) — um dump binário simples dos 10 vetores de pesos
+(`conv1.W`, `conv1.b`, `conv2.W`, ... `fc3.b`), sem cabeçalho de shape
+(a arquitetura é fixa).
+
+`python/classify.ipynb` carrega esses pesos e o conjunto de teste
+(`data/test.bin`, nunca visto no treino) e mostra dígitos com a
+previsão do modelo ao lado — pensado para apresentação: escolha um
+índice e rode a célula para ver a imagem, o dígito previsto, a
+confiança e a distribuição de probabilidade sobre as 10 classes.
+
+```bash
+pip3 install --user matplotlib jupyter   # dependencias extras so do notebook
+jupyter notebook python/classify.ipynb
+```
+
+### Como rodar
+
+Pré-requisito: um `model.bin` já gerado por `./train --model-out
+model.bin ...` (ver "Como compilar e validar" acima), na raiz do
+projeto — o notebook lê `../model.bin` e `../data/test.bin` (caminhos
+relativos a `python/`).
+
+Abra o notebook e rode as células em ordem:
+
+1. Carrega os pesos e o conjunto de teste.
+2. Define o forward pass (mesma arquitetura de `gradient_check.py`,
+   sem o backward — é só inferência, um único forward por imagem, sem
+   gradiente nem redução, então não há eixo paralelizável relevante
+   aqui, nem motivo para ficar em C++).
+3. **"Escolha uma imagem"** — troque `idx` (0 a 9999) e rode a célula
+   de novo para ver outro exemplo: a imagem, o dígito previsto vs. o
+   real (✓/✗), e o gráfico de barras com a probabilidade de cada
+   classe.
+4. Uma grade com 8 exemplos aleatórios de uma vez.
+5. Acurácia sobre uma amostra aleatória do teste (`n_eval`, ajustável
+   — até o conjunto inteiro).
 
 ### Compilar com paralelismo (padrão)
 
@@ -239,3 +285,6 @@ build sem `-fopenmp`"):
   (sequencial).
 - `tempo_sgd_update` — o update de pesos, `lenet_sgd_update`
   (sequencial: depende do gradiente já reduzido de todas as amostras).
+- `modelo_salvo=` — caminho onde os pesos treinados foram salvos
+  (`--model-out`, padrão `model.bin`), para usar com
+  `python/classify.ipynb` (ver "Classificação" acima).
