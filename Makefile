@@ -7,17 +7,24 @@ UNAME_S := $(shell uname -s)
 #   make all OMPFLAG=         -> sequencial de referencia (sem -fopenmp)
 OMPFLAG = -fopenmp
 
+# SCHEDFLAG escolhe a politica do #pragma omp for que distribui as
+# amostras do batch entre threads (train.cpp, macro SCHED_POLICY):
+#   make all                                     -> static (default)
+#   make all SCHEDFLAG=-DSCHED_POLICY=dynamic    -> dynamic
+#   make all SCHEDFLAG=-DSCHED_POLICY=guided     -> guided
+SCHEDFLAG = -DSCHED_POLICY=static
+
 ifeq ($(UNAME_S),Darwin)
 # macOS: g++/gcc do sistema e Apple Clang (sem suporte a -fopenmp) -> usa o
 # GCC de verdade do Homebrew (brew install gcc) e aponta o sysroot para o
 # SDK do Xcode/Command Line Tools, senao o GCC do Homebrew nao acha os
 # headers padrao (math.h, stdio.h etc).
 CXX = g++-16
-CXXFLAGS = -O3 -std=c++17 -Wall -Wextra $(OMPFLAG) -isysroot $(shell xcrun --show-sdk-path)
+CXXFLAGS = -O3 -std=c++17 -Wall -Wextra $(OMPFLAG) $(SCHEDFLAG) -isysroot $(shell xcrun --show-sdk-path)
 else
 # Linux: g++ do sistema ja suporta -fopenmp direto.
 CXX = g++
-CXXFLAGS = -O3 -std=c++17 -Wall -Wextra $(OMPFLAG)
+CXXFLAGS = -O3 -std=c++17 -Wall -Wextra $(OMPFLAG) $(SCHEDFLAG)
 endif
 
 CPP_DIR = cpp

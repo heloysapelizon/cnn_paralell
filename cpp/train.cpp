@@ -20,6 +20,13 @@
 #include <omp.h>
 #endif
 
+/* Politica de schedule do #pragma omp for abaixo, parametrizavel via
+ * -DSCHED_POLICY=<static|dynamic|guided> na compilacao (ver Makefile,
+ * variavel SCHEDFLAG). Default: dynamic. */
+#ifndef SCHED_POLICY
+#define SCHED_POLICY static
+#endif
+
 #include "network.hpp"
 #include "mnist.hpp"
 
@@ -142,7 +149,7 @@ int main(int argc, char **argv) {
                 for (auto &tg : thread_grads) tg.zero(params);
             }
 
-            #pragma omp for reduction(+:iter_loss,iter_correct) schedule(dynamic)
+            #pragma omp for reduction(+:iter_loss,iter_correct) schedule(SCHED_POLICY)
             for (int s = 0; s < batch; s++) {
                 int gi = (it * batch + s) % ref_size;
                 int predicted;

@@ -1,0 +1,483 @@
+(base) heloysapelizon@Heloysas-MacBook-Pro-4 cnn_paralell % for p in 1 2 4 6 8 10; do
+  export OMP_NUM_THREADS=$p
+  for i in 1 2 3 4 5 6 7 8 9 10; do ./train --ref-size 5000 --batch 32 --iters 3500; done
+done
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=1
+tempo=33.316840 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=33.293404 (99.93%)  [eixo paralelizavel]
+tempo_parallel_region=33.274422 (99.87%)  [de fato concorrente]
+tempo_reduction=0.018827 (0.06%)  [sequencial, soma thread_grads]
+tempo_total=33.316840
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=1
+tempo=33.271256 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=33.247970 (99.93%)  [eixo paralelizavel]
+tempo_parallel_region=33.228943 (99.87%)  [de fato concorrente]
+tempo_reduction=0.018875 (0.06%)  [sequencial, soma thread_grads]
+tempo_total=33.271256
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=1
+tempo=33.290071 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=33.266491 (99.93%)  [eixo paralelizavel]
+tempo_parallel_region=33.247379 (99.87%)  [de fato concorrente]
+tempo_reduction=0.018956 (0.06%)  [sequencial, soma thread_grads]
+tempo_total=33.290071
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=1
+tempo=33.256562 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=33.232956 (99.93%)  [eixo paralelizavel]
+tempo_parallel_region=33.213765 (99.87%)  [de fato concorrente]
+tempo_reduction=0.019016 (0.06%)  [sequencial, soma thread_grads]
+tempo_total=33.256562
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=1
+tempo=33.280066 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=33.256714 (99.93%)  [eixo paralelizavel]
+tempo_parallel_region=33.237828 (99.87%)  [de fato concorrente]
+tempo_reduction=0.018731 (0.06%)  [sequencial, soma thread_grads]
+tempo_total=33.280066
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=1
+tempo=33.267381 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=33.244118 (99.93%)  [eixo paralelizavel]
+tempo_parallel_region=33.225305 (99.87%)  [de fato concorrente]
+tempo_reduction=0.018623 (0.06%)  [sequencial, soma thread_grads]
+tempo_total=33.267381
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=1
+tempo=33.267978 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=33.244580 (99.93%)  [eixo paralelizavel]
+tempo_parallel_region=33.225744 (99.87%)  [de fato concorrente]
+tempo_reduction=0.018666 (0.06%)  [sequencial, soma thread_grads]
+tempo_total=33.267978
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=1
+tempo=33.252694 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=33.229258 (99.93%)  [eixo paralelizavel]
+tempo_parallel_region=33.210368 (99.87%)  [de fato concorrente]
+tempo_reduction=0.018697 (0.06%)  [sequencial, soma thread_grads]
+tempo_total=33.252694
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=1
+tempo=33.287587 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=33.264068 (99.93%)  [eixo paralelizavel]
+tempo_parallel_region=33.244935 (99.87%)  [de fato concorrente]
+tempo_reduction=0.018959 (0.06%)  [sequencial, soma thread_grads]
+tempo_total=33.287587
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=1
+tempo=33.343176 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=33.319781 (99.93%)  [eixo paralelizavel]
+tempo_parallel_region=33.300892 (99.87%)  [de fato concorrente]
+tempo_reduction=0.018694 (0.06%)  [sequencial, soma thread_grads]
+tempo_total=33.343176
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=2
+tempo=17.593575 loss_medio=0.0713 acuracia_treino=0.9786
+tempo_batch_loop=17.563837 (99.83%)  [eixo paralelizavel]
+tempo_parallel_region=17.512616 (99.54%)  [de fato concorrente]
+tempo_reduction=0.051033 (0.29%)  [sequencial, soma thread_grads]
+tempo_total=17.593575
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=2
+tempo=17.593374 loss_medio=0.0713 acuracia_treino=0.9786
+tempo_batch_loop=17.563573 (99.83%)  [eixo paralelizavel]
+tempo_parallel_region=17.512546 (99.54%)  [de fato concorrente]
+tempo_reduction=0.050828 (0.29%)  [sequencial, soma thread_grads]
+tempo_total=17.593374
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=2
+tempo=17.631472 loss_medio=0.0713 acuracia_treino=0.9786
+tempo_batch_loop=17.600803 (99.83%)  [eixo paralelizavel]
+tempo_parallel_region=17.548653 (99.53%)  [de fato concorrente]
+tempo_reduction=0.051954 (0.29%)  [sequencial, soma thread_grads]
+tempo_total=17.631472
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=2
+tempo=17.606209 loss_medio=0.0713 acuracia_treino=0.9786
+tempo_batch_loop=17.575049 (99.82%)  [eixo paralelizavel]
+tempo_parallel_region=17.522493 (99.52%)  [de fato concorrente]
+tempo_reduction=0.052336 (0.30%)  [sequencial, soma thread_grads]
+tempo_total=17.606209
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=2
+tempo=17.574516 loss_medio=0.0713 acuracia_treino=0.9786
+tempo_batch_loop=17.544684 (99.83%)  [eixo paralelizavel]
+tempo_parallel_region=17.493506 (99.54%)  [de fato concorrente]
+tempo_reduction=0.050974 (0.29%)  [sequencial, soma thread_grads]
+tempo_total=17.574516
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=2
+tempo=17.594057 loss_medio=0.0712 acuracia_treino=0.9785
+tempo_batch_loop=17.563374 (99.83%)  [eixo paralelizavel]
+tempo_parallel_region=17.511855 (99.53%)  [de fato concorrente]
+tempo_reduction=0.051321 (0.29%)  [sequencial, soma thread_grads]
+tempo_total=17.594057
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=2
+tempo=17.559202 loss_medio=0.0713 acuracia_treino=0.9786
+tempo_batch_loop=17.529459 (99.83%)  [eixo paralelizavel]
+tempo_parallel_region=17.478441 (99.54%)  [de fato concorrente]
+tempo_reduction=0.050840 (0.29%)  [sequencial, soma thread_grads]
+tempo_total=17.559202
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=2
+tempo=17.569453 loss_medio=0.0713 acuracia_treino=0.9786
+tempo_batch_loop=17.539164 (99.83%)  [eixo paralelizavel]
+tempo_parallel_region=17.487594 (99.53%)  [de fato concorrente]
+tempo_reduction=0.051365 (0.29%)  [sequencial, soma thread_grads]
+tempo_total=17.569453
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=2
+tempo=17.555389 loss_medio=0.0713 acuracia_treino=0.9786
+tempo_batch_loop=17.525261 (99.83%)  [eixo paralelizavel]
+tempo_parallel_region=17.474077 (99.54%)  [de fato concorrente]
+tempo_reduction=0.051005 (0.29%)  [sequencial, soma thread_grads]
+tempo_total=17.555389
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=2
+tempo=17.559852 loss_medio=0.0713 acuracia_treino=0.9786
+tempo_batch_loop=17.529874 (99.83%)  [eixo paralelizavel]
+tempo_parallel_region=17.478692 (99.54%)  [de fato concorrente]
+tempo_reduction=0.051014 (0.29%)  [sequencial, soma thread_grads]
+tempo_total=17.559852
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=4
+tempo=10.011548 loss_medio=0.0767 acuracia_treino=0.9772
+tempo_batch_loop=9.890477 (98.79%)  [eixo paralelizavel]
+tempo_parallel_region=9.751948 (97.41%)  [de fato concorrente]
+tempo_reduction=0.138309 (1.38%)  [sequencial, soma thread_grads]
+tempo_total=10.011548
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=4
+tempo=10.052886 loss_medio=0.0727 acuracia_treino=0.9783
+tempo_batch_loop=9.929691 (98.77%)  [eixo paralelizavel]
+tempo_parallel_region=9.791986 (97.40%)  [de fato concorrente]
+tempo_reduction=0.137507 (1.37%)  [sequencial, soma thread_grads]
+tempo_total=10.052886
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=4
+tempo=10.037879 loss_medio=0.0725 acuracia_treino=0.9781
+tempo_batch_loop=9.913754 (98.76%)  [eixo paralelizavel]
+tempo_parallel_region=9.782761 (97.46%)  [de fato concorrente]
+tempo_reduction=0.130775 (1.30%)  [sequencial, soma thread_grads]
+tempo_total=10.037879
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=4
+tempo=10.743641 loss_medio=0.0730 acuracia_treino=0.9780
+tempo_batch_loop=10.670307 (99.32%)  [eixo paralelizavel]
+tempo_parallel_region=10.555388 (98.25%)  [de fato concorrente]
+tempo_reduction=0.114729 (1.07%)  [sequencial, soma thread_grads]
+tempo_total=10.743641
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=4
+tempo=10.028172 loss_medio=0.0723 acuracia_treino=0.9782
+tempo_batch_loop=9.904140 (98.76%)  [eixo paralelizavel]
+tempo_parallel_region=9.772449 (97.45%)  [de fato concorrente]
+tempo_reduction=0.131494 (1.31%)  [sequencial, soma thread_grads]
+tempo_total=10.028172
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=4
+tempo=10.036415 loss_medio=0.0710 acuracia_treino=0.9785
+tempo_batch_loop=9.911790 (98.76%)  [eixo paralelizavel]
+tempo_parallel_region=9.780465 (97.45%)  [de fato concorrente]
+tempo_reduction=0.131107 (1.31%)  [sequencial, soma thread_grads]
+tempo_total=10.036415
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=4
+tempo=10.030218 loss_medio=0.0720 acuracia_treino=0.9786
+tempo_batch_loop=9.905414 (98.76%)  [eixo paralelizavel]
+tempo_parallel_region=9.773784 (97.44%)  [de fato concorrente]
+tempo_reduction=0.131442 (1.31%)  [sequencial, soma thread_grads]
+tempo_total=10.030218
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=4
+tempo=10.027834 loss_medio=0.0713 acuracia_treino=0.9787
+tempo_batch_loop=9.905008 (98.78%)  [eixo paralelizavel]
+tempo_parallel_region=9.773355 (97.46%)  [de fato concorrente]
+tempo_reduction=0.131454 (1.31%)  [sequencial, soma thread_grads]
+tempo_total=10.027834
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=4
+tempo=10.754523 loss_medio=0.0711 acuracia_treino=0.9788
+tempo_batch_loop=10.680579 (99.31%)  [eixo paralelizavel]
+tempo_parallel_region=10.565949 (98.25%)  [de fato concorrente]
+tempo_reduction=0.114454 (1.06%)  [sequencial, soma thread_grads]
+tempo_total=10.754523
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=4
+tempo=10.754424 loss_medio=0.0709 acuracia_treino=0.9789
+tempo_batch_loop=10.680110 (99.31%)  [eixo paralelizavel]
+tempo_parallel_region=10.564676 (98.24%)  [de fato concorrente]
+tempo_reduction=0.115228 (1.07%)  [sequencial, soma thread_grads]
+tempo_total=10.754424
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=6
+tempo=7.617704 loss_medio=0.0710 acuracia_treino=0.9788
+tempo_batch_loop=7.530922 (98.86%)  [eixo paralelizavel]
+tempo_parallel_region=7.351170 (96.50%)  [de fato concorrente]
+tempo_reduction=0.179482 (2.36%)  [sequencial, soma thread_grads]
+tempo_total=7.617704
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=6
+tempo=7.603254 loss_medio=0.0708 acuracia_treino=0.9790
+tempo_batch_loop=7.516733 (98.86%)  [eixo paralelizavel]
+tempo_parallel_region=7.341393 (96.56%)  [de fato concorrente]
+tempo_reduction=0.175084 (2.30%)  [sequencial, soma thread_grads]
+tempo_total=7.603254
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=6
+tempo=7.599922 loss_medio=0.0711 acuracia_treino=0.9788
+tempo_batch_loop=7.513560 (98.86%)  [eixo paralelizavel]
+tempo_parallel_region=7.339165 (96.57%)  [de fato concorrente]
+tempo_reduction=0.174169 (2.29%)  [sequencial, soma thread_grads]
+tempo_total=7.599922
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=6
+tempo=8.077540 loss_medio=0.0712 acuracia_treino=0.9787
+tempo_batch_loop=8.002528 (99.07%)  [eixo paralelizavel]
+tempo_parallel_region=7.829518 (96.93%)  [de fato concorrente]
+tempo_reduction=0.172684 (2.14%)  [sequencial, soma thread_grads]
+tempo_total=8.077540
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=6
+tempo=7.640177 loss_medio=0.0708 acuracia_treino=0.9789
+tempo_batch_loop=7.553391 (98.86%)  [eixo paralelizavel]
+tempo_parallel_region=7.374808 (96.53%)  [de fato concorrente]
+tempo_reduction=0.178318 (2.33%)  [sequencial, soma thread_grads]
+tempo_total=7.640177
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=6
+tempo=8.071519 loss_medio=0.0720 acuracia_treino=0.9784
+tempo_batch_loop=7.996116 (99.07%)  [eixo paralelizavel]
+tempo_parallel_region=7.823434 (96.93%)  [de fato concorrente]
+tempo_reduction=0.172355 (2.14%)  [sequencial, soma thread_grads]
+tempo_total=8.071519
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=6
+tempo=7.596240 loss_medio=0.0709 acuracia_treino=0.9790
+tempo_batch_loop=7.510857 (98.88%)  [eixo paralelizavel]
+tempo_parallel_region=7.336210 (96.58%)  [de fato concorrente]
+tempo_reduction=0.174406 (2.30%)  [sequencial, soma thread_grads]
+tempo_total=7.596240
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=6
+tempo=7.596455 loss_medio=0.0736 acuracia_treino=0.9782
+tempo_batch_loop=7.511866 (98.89%)  [eixo paralelizavel]
+tempo_parallel_region=7.337216 (96.59%)  [de fato concorrente]
+tempo_reduction=0.174331 (2.29%)  [sequencial, soma thread_grads]
+tempo_total=7.596455
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=6
+tempo=7.599897 loss_medio=0.0748 acuracia_treino=0.9776
+tempo_batch_loop=7.515356 (98.89%)  [eixo paralelizavel]
+tempo_parallel_region=7.340628 (96.59%)  [de fato concorrente]
+tempo_reduction=0.174436 (2.30%)  [sequencial, soma thread_grads]
+tempo_total=7.599897
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=6
+tempo=7.618194 loss_medio=0.0714 acuracia_treino=0.9787
+tempo_batch_loop=7.530890 (98.85%)  [eixo paralelizavel]
+tempo_parallel_region=7.351130 (96.49%)  [de fato concorrente]
+tempo_reduction=0.179494 (2.36%)  [sequencial, soma thread_grads]
+tempo_total=7.618194
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=8
+tempo=7.276436 loss_medio=0.0722 acuracia_treino=0.9785
+tempo_batch_loop=7.184834 (98.74%)  [eixo paralelizavel]
+tempo_parallel_region=6.950280 (95.52%)  [de fato concorrente]
+tempo_reduction=0.234212 (3.22%)  [sequencial, soma thread_grads]
+tempo_total=7.276436
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=8
+tempo=7.263747 loss_medio=0.0712 acuracia_treino=0.9786
+tempo_batch_loop=7.173302 (98.75%)  [eixo paralelizavel]
+tempo_parallel_region=6.938137 (95.52%)  [de fato concorrente]
+tempo_reduction=0.234816 (3.23%)  [sequencial, soma thread_grads]
+tempo_total=7.263747
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=8
+tempo=6.523549 loss_medio=0.0739 acuracia_treino=0.9781
+tempo_batch_loop=6.421579 (98.44%)  [eixo paralelizavel]
+tempo_parallel_region=6.181079 (94.75%)  [de fato concorrente]
+tempo_reduction=0.240165 (3.68%)  [sequencial, soma thread_grads]
+tempo_total=6.523549
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=8
+tempo=6.525756 loss_medio=0.0717 acuracia_treino=0.9785
+tempo_batch_loop=6.426776 (98.48%)  [eixo paralelizavel]
+tempo_parallel_region=6.187736 (94.82%)  [de fato concorrente]
+tempo_reduction=0.238682 (3.66%)  [sequencial, soma thread_grads]
+tempo_total=6.525756
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=8
+tempo=7.265015 loss_medio=0.0726 acuracia_treino=0.9781
+tempo_batch_loop=7.174369 (98.75%)  [eixo paralelizavel]
+tempo_parallel_region=6.940488 (95.53%)  [de fato concorrente]
+tempo_reduction=0.233575 (3.22%)  [sequencial, soma thread_grads]
+tempo_total=7.265015
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=8
+tempo=6.468188 loss_medio=0.0712 acuracia_treino=0.9786
+tempo_batch_loop=6.368147 (98.45%)  [eixo paralelizavel]
+tempo_parallel_region=6.128570 (94.75%)  [de fato concorrente]
+tempo_reduction=0.239180 (3.70%)  [sequencial, soma thread_grads]
+tempo_total=6.468188
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=8
+tempo=6.524236 loss_medio=0.0709 acuracia_treino=0.9789
+tempo_batch_loop=6.424307 (98.47%)  [eixo paralelizavel]
+tempo_parallel_region=6.185020 (94.80%)  [de fato concorrente]
+tempo_reduction=0.238944 (3.66%)  [sequencial, soma thread_grads]
+tempo_total=6.524236
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=8
+tempo=6.530418 loss_medio=0.0717 acuracia_treino=0.9785
+tempo_batch_loop=6.430750 (98.47%)  [eixo paralelizavel]
+tempo_parallel_region=6.193471 (94.84%)  [de fato concorrente]
+tempo_reduction=0.236869 (3.63%)  [sequencial, soma thread_grads]
+tempo_total=6.530418
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=8
+tempo=6.516293 loss_medio=0.0716 acuracia_treino=0.9789
+tempo_batch_loop=6.414968 (98.45%)  [eixo paralelizavel]
+tempo_parallel_region=6.175992 (94.78%)  [de fato concorrente]
+tempo_reduction=0.238599 (3.66%)  [sequencial, soma thread_grads]
+tempo_total=6.516293
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=8
+tempo=6.519085 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=6.419208 (98.47%)  [eixo paralelizavel]
+tempo_parallel_region=6.179046 (94.78%)  [de fato concorrente]
+tempo_reduction=0.239838 (3.68%)  [sequencial, soma thread_grads]
+tempo_total=6.519085
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=10
+tempo=6.090126 loss_medio=0.0771 acuracia_treino=0.9772
+tempo_batch_loop=5.995906 (98.45%)  [eixo paralelizavel]
+tempo_parallel_region=5.699996 (93.59%)  [de fato concorrente]
+tempo_reduction=0.295551 (4.85%)  [sequencial, soma thread_grads]
+tempo_total=6.090126
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=10
+tempo=6.097791 loss_medio=0.0716 acuracia_treino=0.9787
+tempo_batch_loop=5.999936 (98.40%)  [eixo paralelizavel]
+tempo_parallel_region=5.706733 (93.59%)  [de fato concorrente]
+tempo_reduction=0.292746 (4.80%)  [sequencial, soma thread_grads]
+tempo_total=6.097791
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=10
+tempo=6.145216 loss_medio=0.0710 acuracia_treino=0.9789
+tempo_batch_loop=6.051906 (98.48%)  [eixo paralelizavel]
+tempo_parallel_region=5.759434 (93.72%)  [de fato concorrente]
+tempo_reduction=0.292152 (4.75%)  [sequencial, soma thread_grads]
+tempo_total=6.145216
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=10
+tempo=6.087753 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=5.992208 (98.43%)  [eixo paralelizavel]
+tempo_parallel_region=5.697467 (93.59%)  [de fato concorrente]
+tempo_reduction=0.294352 (4.84%)  [sequencial, soma thread_grads]
+tempo_total=6.087753
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=10
+tempo=6.108101 loss_medio=0.0717 acuracia_treino=0.9786
+tempo_batch_loop=6.010552 (98.40%)  [eixo paralelizavel]
+tempo_parallel_region=5.719556 (93.64%)  [de fato concorrente]
+tempo_reduction=0.290562 (4.76%)  [sequencial, soma thread_grads]
+tempo_total=6.108101
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=10
+tempo=6.078797 loss_medio=0.0727 acuracia_treino=0.9782
+tempo_batch_loop=5.982501 (98.42%)  [eixo paralelizavel]
+tempo_parallel_region=5.690198 (93.61%)  [de fato concorrente]
+tempo_reduction=0.291949 (4.80%)  [sequencial, soma thread_grads]
+tempo_total=6.078797
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=10
+tempo=6.098766 loss_medio=0.0709 acuracia_treino=0.9788
+tempo_batch_loop=6.001089 (98.40%)  [eixo paralelizavel]
+tempo_parallel_region=5.708513 (93.60%)  [de fato concorrente]
+tempo_reduction=0.292184 (4.79%)  [sequencial, soma thread_grads]
+tempo_total=6.098766
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=10
+tempo=6.099502 loss_medio=0.0713 acuracia_treino=0.9786
+tempo_batch_loop=6.002185 (98.40%)  [eixo paralelizavel]
+tempo_parallel_region=5.709819 (93.61%)  [de fato concorrente]
+tempo_reduction=0.292010 (4.79%)  [sequencial, soma thread_grads]
+tempo_total=6.099502
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=10
+tempo=6.099429 loss_medio=0.0703 acuracia_treino=0.9792
+tempo_batch_loop=6.001493 (98.39%)  [eixo paralelizavel]
+tempo_parallel_region=5.708217 (93.59%)  [de fato concorrente]
+tempo_reduction=0.292947 (4.80%)  [sequencial, soma thread_grads]
+tempo_total=6.099429
+ 
+nucleos_fisicos=10 processadores_logicos=10
+threads_usadas=10
+tempo=6.105692 loss_medio=0.0713 acuracia_treino=0.9787
+tempo_batch_loop=6.008582 (98.41%)  [eixo paralelizavel]
+tempo_parallel_region=5.716797 (93.63%)  [de fato concorrente]
+tempo_reduction=0.291445 (4.77%)  [sequencial, soma thread_grads]
+tempo_total=6.105692

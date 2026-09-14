@@ -161,6 +161,36 @@ Sem `-fopenmp`, os `#pragma omp` são ignorados pelo compilador
 tem efeito nesse binário. Use esse build para tirar o T1 (tempo
 sequencial de referência) e comparar com as execuções paralelas.
 
+### Escolher a política de scheduling (balanceamento de carga)
+
+A política do `#pragma omp for` que distribui as amostras do batch
+entre threads (ver "Eixo de paralelismo") é escolhida na compilação,
+via a variável `SCHEDFLAG` do `Makefile` (macro `SCHED_POLICY` em
+`train.cpp`). **Default: `static`** — o padrão do OpenMP quando
+nenhuma cláusula `schedule()` é especificada: cada thread recebe um
+bloco fixo e igual de amostras, decidido uma única vez no início.
+
+```bash
+make clean && make all                                  # static (default)
+make clean && make all SCHEDFLAG=-DSCHED_POLICY=dynamic  # dynamic
+make clean && make all SCHEDFLAG=-DSCHED_POLICY=guided   # guided
+```
+
+- **`dynamic`**: cada thread pega uma amostra por vez de uma fila
+  compartilhada, em vez de um bloco fixo — ajuda quando threads
+  correm em núcleos de velocidades diferentes (comum em CPUs com
+  núcleos heterogêneos, ex. Apple Silicon com núcleos de performance
+  e eficiência), já que uma thread mais lenta simplesmente processa
+  menos amostras, em vez de travar as outras esperando seu bloco fixo
+  terminar.
+- **`guided`**: como `dynamic`, mas o tamanho dos blocos começa grande
+  e diminui progressivamente — menos overhead de sincronização no
+  início, ajuste fino no fim.
+
+Cada troca exige recompilar (`make clean && make all ...`) — a política
+fica fixa no binário, não é configurável em tempo de execução (diferente
+de `OMP_NUM_THREADS`, que é lido pelo runtime a cada execução).
+
 ### Build no macOS
 
 O `g++`/`gcc` do sistema no macOS é o Apple Clang, que não suporta
@@ -188,9 +218,9 @@ Em Linux o `Makefile` usa `g++` do sistema direto, sem `-isysroot`.
 
 - `threads_usadas=` — número real de threads OpenMP usadas no laço
   paralelo (lido via `omp_get_num_threads()` dentro da região
-  paralela, capturado uma vez no primeiro `it`). É o valor a registrar
-  na tabela de escalabilidade forte da Fase 7 — sempre `1` no binário
-  sequencial de referência (`OMPFLAG=`).
+  paralela, capturado uma vez no primeiro `it`). Útil para conferir
+  contra `OMP_NUM_THREADS` numa bateria de medições de escalabilidade —
+  sempre `1` no binário sequencial de referência (`OMPFLAG=`).
 
 Além do tempo total (`tempo_total=`), o binário imprime o tempo gasto
 em cada eixo do loop de treino (medido com `wtime()`, ver "Detalhes do
@@ -209,10 +239,3 @@ build sem `-fopenmp`"):
   (sequencial).
 - `tempo_sgd_update` — o update de pesos, `lenet_sgd_update`
   (sequencial: depende do gradiente já reduzido de todas as amostras).
-
-## Próximo passo
-
-Rodar os benchmarks de escalabilidade forte (`OMP_NUM_THREADS`
-variando, tamanho do problema fixo) e fraca (tamanho do problema
-crescendo com o número de threads), comparando contra o baseline
-sequencial de referência (`make all OMPFLAG=`).
