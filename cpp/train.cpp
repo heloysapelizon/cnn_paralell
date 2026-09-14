@@ -12,9 +12,6 @@
 #include <string>
 #include <vector>
 #include <thread>
-#include <fstream>
-#include <sstream>
-#include <set>
 #include <chrono>
 #ifdef _OPENMP
 #include <omp.h>
@@ -47,31 +44,6 @@ static double wtime() {
 #endif
 }
 
-/* Conta nucleos fisicos via /proc/cpuinfo (pares unicos physical id + core id).
- * Se nao conseguir ler, cai para hardware_concurrency() (numero logico). */
-static int physical_core_count() {
-    std::ifstream f("/proc/cpuinfo");
-    if (!f) return (int)std::thread::hardware_concurrency();
-
-    std::string line;
-    long cur_phys = -1, cur_core = -1;
-    std::set<std::pair<long, long>> seen;
-    while (std::getline(f, line)) {
-        if (line.rfind("physical id", 0) == 0) {
-            auto pos = line.find(':');
-            if (pos != std::string::npos) cur_phys = std::stol(line.substr(pos + 1));
-        } else if (line.rfind("core id", 0) == 0) {
-            auto pos = line.find(':');
-            if (pos != std::string::npos) {
-                cur_core = std::stol(line.substr(pos + 1));
-                seen.insert({cur_phys, cur_core});
-            }
-        }
-    }
-    if (seen.empty()) return (int)std::thread::hardware_concurrency();
-    return (int)seen.size();
-}
-
 int main(int argc, char **argv) {
     std::string data_dir = arg_value(argc, argv, "--data-dir", "data");
     int ref_size = std::atoi(arg_value(argc, argv, "--ref-size", "2000"));
@@ -80,8 +52,7 @@ int main(int argc, char **argv) {
     float lr = std::atof(arg_value(argc, argv, "--lr", "0.05"));
     unsigned seed = (unsigned)std::atoi(arg_value(argc, argv, "--seed", "42"));
 
-    printf("nucleos_fisicos=%d processadores_logicos=%d\n",
-           physical_core_count(), (int)std::thread::hardware_concurrency());
+    printf("processadores_logicos=%d\n", (int)std::thread::hardware_concurrency());
 
     MnistData train = load_mnist(data_dir + "/train.bin", ref_size);
     if ((int)train.images.size() < ref_size) {
