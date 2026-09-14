@@ -19,7 +19,7 @@
 
 /* Politica de schedule do #pragma omp for abaixo, parametrizavel via
  * -DSCHED_POLICY=<static|dynamic|guided> na compilacao (ver Makefile,
- * variavel SCHEDFLAG). Default: dynamic. */
+ * variavel SCHEDFLAG). Default: static. */
 #ifndef SCHED_POLICY
 #define SCHED_POLICY static
 #endif
@@ -65,7 +65,9 @@ int main(int argc, char **argv) {
     LeNetGrad grad;
     grad.zero(params);
 
-    /* Um LeNetGrad por thread, reduzido apos o parallel for (ver README). */
+    /* Um LeNetGrad por thread, reduzido apos o parallel for (ver README).
+     * Compartilhado entre threads, mas sem race: cada thread so escreve
+     * em thread_grads[thread_id] (indice proprio). */
     std::vector<LeNetGrad> thread_grads;
     int n_threads_used = 1; /* capturado via omp_get_num_threads() dentro do parallel abaixo */
 
@@ -83,7 +85,7 @@ int main(int argc, char **argv) {
     double t0 = wtime();
 
     for (int it = 0; it < iters; it++) {
-        double tz0 = wtime();
+        double zero_grad_start = wtime();
         /* zera reaproveitando os buffers ja alocados (evita realocar a cada iter) */
         std::fill(grad.conv1.dW.begin(), grad.conv1.dW.end(), 0.0f);
         std::fill(grad.conv1.db.begin(), grad.conv1.db.end(), 0.0f);
@@ -95,53 +97,67 @@ int main(int argc, char **argv) {
         std::fill(grad.fc2.db.begin(), grad.fc2.db.end(), 0.0f);
         std::fill(grad.fc3.dW.begin(), grad.fc3.dW.end(), 0.0f);
         std::fill(grad.fc3.db.begin(), grad.fc3.db.end(), 0.0f);
-        t_zero_grad += wtime() - tz0;
+        t_zero_grad += wtime() - zero_grad_start;
 
         double iter_loss = 0.0;
         long iter_correct = 0;
 
-        double tb0 = wtime();
+        double parallel_start = wtime();
+        /* thread_id e n_threads sao locais a cada thread (declarados
+         * dentro da regiao) -- nao precisam de firstprivate/private
+         * explicito. params e train sao somente leitura (seguro
+         * compartilhar); thread_grads e' compartilhado por indice (ver
+         * comentario acima). */
         #pragma omp parallel
         {
             #ifdef _OPENMP
-            int tid = omp_get_thread_num();
+            int thread_id = omp_get_thread_num();
             #else
-            int tid = 0;
+            int thread_id = 0;
             #endif
 
             #pragma omp single
             {
                 #ifdef _OPENMP
-                int nt = omp_get_num_threads();
+                int n_threads = omp_get_num_threads();
                 #else
-                int nt = 1;
+                int n_threads = 1;
                 #endif
-                n_threads_used = nt;
-                thread_grads.resize(nt);
-                for (auto &tg : thread_grads) tg.zero(params);
+                n_threads_used = n_threads;
+                thread_grads.resize(n_threads);
+                for (auto &thread_grad : thread_grads) thread_grad.zero(params);
             }
 
+            /* sem chunk explicito: usa o tamanho padrao de cada politica
+             * (static: batch/n_threads; dynamic/guided: 1 por vez) -- o
+             * custo por amostra e' uniforme (mesma arquitetura, mesma
+             * imagem 28x28), entao nao ha ganho em ajustar o chunk a
+             * mao (ver README, "Escolher a politica de scheduling").
+             * iter_loss/iter_correct sao escalares, por isso usam
+             * reduction(+:...) em vez do padrao buffer-por-thread usado
+             * para os gradientes (que sao arrays grandes demais para uma
+             * reduction do OpenMP ser pratica). */
             #pragma omp for reduction(+:iter_loss,iter_correct) schedule(SCHED_POLICY)
             for (int s = 0; s < batch; s++) {
                 int gi = (it * batch + s) % ref_size;
                 int predicted;
                 float loss = lenet_forward_backward(params, train.images[gi], train.labels[gi],
-                                                      thread_grads[tid], predicted);
+                                                      thread_grads[thread_id], predicted);
                 iter_loss += loss;
                 if (predicted == train.labels[gi]) iter_correct++;
             }
         }
-        t_parallel_region += wtime() - tb0;
+        t_parallel_region += wtime() - parallel_start;
 
-        double tr0 = wtime();
-        for (auto &tg : thread_grads) grad.add(tg);
-        t_reduction += wtime() - tr0;
+        double reduction_start = wtime();
+        for (auto &thread_grad : thread_grads) grad.add(thread_grad);
+        t_reduction += wtime() - reduction_start;
 
-        t_batch_loop += wtime() - tb0;
+        t_batch_loop += wtime() - parallel_start;
 
-        double tu0 = wtime();
+        double sgd_start = wtime();
         lenet_sgd_update(params, grad, lr / (float)batch);
-        t_sgd_update += wtime() - tu0;
+        t_sgd_update += wtime() - sgd_start;
 
         total_loss += iter_loss;
         total_correct += iter_correct;
