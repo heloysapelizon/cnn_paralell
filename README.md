@@ -2,11 +2,7 @@
 
 - Integrantes: Heloysa Pelizon & Marina Bon
 
-Arquitetura: `Conv(1→6,5x5) → ReLU → MaxPool2x2 → Conv(6→16,5x5) → ReLU →
-MaxPool2x2 → FC(256→120) → ReLU → FC(120→84) → ReLU → FC(84→10) →
-Softmax+CrossEntropy`.
-
-## Onde está o paralelismo
+## Paralelismo
 
 O treino processa o batch amostra por amostra, e cada amostra passa pela
 rede inteira (forward + backward) de forma independente das outras — esse
@@ -42,6 +38,10 @@ cnn_paralell/
 └── data/                  — arquivos baixados/gerados pelo prepare_mnist.py (não versionado)
 ```
 
+Arquitetura: `Conv(1→6,5x5) → ReLU → MaxPool2x2 → Conv(6→16,5x5) → ReLU →
+MaxPool2x2 → FC(256→120) → ReLU → FC(120→84) → ReLU → FC(84→10) →
+Softmax+CrossEntropy`.
+
 ## Como rodar
 
 ```bash
@@ -61,9 +61,6 @@ O número de threads é controlado pela variável de ambiente
 ```bash
 OMP_NUM_THREADS=4 ./train --ref-size 5000 --batch 64 --iters 3500
 ```
-
-Sem essa variável, o runtime OpenMP decide sozinho (geralmente o total de
-núcleos lógicos da máquina).
 
 ### Baseline sequencial
 
@@ -86,7 +83,7 @@ make clean && make all SCHEDFLAG=-DSCHED_POLICY=dynamic  # dynamic
 make clean && make all SCHEDFLAG=-DSCHED_POLICY=guided   # guided
 ```
 
-A política fica fixa no binário — trocar exige recompilar.
+A política fica fixa no binário (trocar exige recompilar).
 
 ### macOS
 
